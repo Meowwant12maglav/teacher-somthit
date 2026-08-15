@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Room 1 · Live Counter</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">R</span>
+          <div>
+            <p class="eyebrow">SMART SPACE</p>
+            <h1>Room 1</h1>
+          </div>
+        </div>
+        <div class="connection" id="connectionStatus" aria-live="polite">
+          <span class="status-dot"></span>
+          <span>Demo mode</span>
+        </div>
+      </header>
+
+      <section class="hero" aria-labelledby="occupancyTitle">
+        <div class="hero-copy">
+          <p class="eyebrow">LIVE OCCUPANCY</p>
+          <h2 id="occupancyTitle"><span id="occupancyCount">0</span><span class="people-label"> people in the room</span></h2>
+          <p class="subtle" id="updatedAt">Waiting for sensor activity</p>
+        </div>
+        <div class="capacity-card">
+          <div class="capacity-head"><span>Room capacity</span><strong>20</strong></div>
+          <div class="progress-track" aria-label="Room capacity"><span id="capacityFill"></span></div>
+          <p><strong id="capacityPercent">0%</strong> currently occupied</p>
+        </div>
+      </section>
+
+      <section class="dashboard-grid" aria-label="Room dashboard">
+        <article class="card door-card">
+          <div class="card-heading">
+            <div>
+              <p class="eyebrow">DOOR SENSOR</p>
+              <h3>Movement direction</h3>
+            </div>
+            <span class="live-pill">LIVE</span>
+          </div>
+
+          <div class="door-visual" id="doorVisual">
+            <span class="door-label left">LEFT<br><small>outside</small></span>
+            <div class="doorway"><span></span><span></span><span></span></div>
+            <span class="door-label right">RIGHT<br><small>inside</small></span>
+            <div class="traveler" aria-hidden="true"><i></i><b></b></div>
+          </div>
+          <div class="event-callout neutral" id="eventCallout" aria-live="polite">
+            <span class="event-icon">↔</span>
+            <div><strong>Ready to detect</strong><p>Waiting for a two-sensor sequence.</p></div>
+          </div>
+        </article>
+
+        <article class="card stats-card">
+          <div class="card-heading">
+            <div><p class="eyebrow">TODAY</p><h3>Traffic summary</h3></div>
+          </div>
+          <div class="stat-list">
+            <div class="stat-row entry"><span class="stat-arrow">→</span><span>Entered room</span><strong id="entriesCount">0</strong></div>
+            <div class="stat-row exit"><span class="stat-arrow">←</span><span>Exited room</span><strong id="exitsCount">0</strong></div>
+            <div class="stat-row total"><span class="stat-arrow">#</span><span>Sensor events</span><strong id="eventsCount">0</strong></div>
+          </div>
+          <button class="reset-button" id="resetButton" type="button">Reset today’s count</button>
+        </article>
+
+        <article class="card activity-card">
+          <div class="card-heading">
+            <div><p class="eyebrow">RECENT ACTIVITY</p><h3>Event timeline</h3></div>
+            <button class="text-button" id="demoButton" type="button">Run demo</button>
+          </div>
+          <ol class="timeline" id="timeline">
+            <li class="empty-state">No entries yet. The first sensor event will appear here.</li>
+          </ol>
+        </article>
+      </section>
+
+      <section class="connect-card" id="connectPanel">
+        <div>
+          <p class="eyebrow">ESP32 CONNECTION</p>
+          <h3>Connect your sensor</h3>
+          <p class="subtle">Paste your ESP32 address. The dashboard will check <code>/api/status</code> every second.</p>
+        </div>
+        <form id="connectionForm">
+          <label for="esp32Url">ESP32 URL</label>
+          <div class="url-input"><input id="esp32Url" type="url" placeholder="http://192.168.1.50" autocomplete="url" /><button type="submit">Connect</button></div>
+          <p class="form-message" id="formMessage">Leave blank to stay in demo mode.</p>
+        </form>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
