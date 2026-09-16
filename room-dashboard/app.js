@@ -4,6 +4,50 @@ const state = { occupancy: 0, entries: 0, exits: 0, events: [], endpoint: localS
 const el = (id) => document.getElementById(id);
 const ui = { count: el('occupancyCount'), entries: el('entriesCount'), exits: el('exitsCount'), events: el('eventsCount'), fill: el('capacityFill'), percent: el('capacityPercent'), updated: el('updatedAt'), timeline: el('timeline'), callout: el('eventCallout'), door: el('doorVisual'), status: el('connectionStatus'), url: el('esp32Url'), message: el('formMessage') };
 
+const camCanvas = el('camCanvas');
+const camCtx = camCanvas ? camCanvas.getContext('2d') : null;
+const camImageData = camCtx ? camCtx.createImageData(camCanvas.width, 1) : null;
+const camPixels = camImageData ? camImageData.data : null;
+let camSocket = null;
+
+function setCameraStatus(connected, text) {
+  const pill = el('camStatusPill');
+  if (pill) { pill.textContent = connected ? 'LIVE' : 'OFFLINE'; pill.classList.toggle('live-pill-off', !connected); }
+  const message = el('camMessage');
+  if (message) message.textContent = text;
+}
+function drawCameraLine(data) {
+  const buf = new Uint16Array(data);
+  const lineNo = buf[0];
+  const width = camCanvas.width;
+  const rows = Math.floor((buf.length - 1) / width);
+  for (let y = 0; y < rows; y++) {
+    let base = 0;
+    for (let x = 0; x < width; x++) {
+      const c = 1 + x + y * width;
+      camPixels[base] = ((buf[c] & 0xf800) >> 8) | ((buf[c] & 0xe000) >> 13);
+      camPixels[base + 1] = ((buf[c] & 0x07e0) >> 3) | ((buf[c] & 0x0600) >> 9);
+      camPixels[base + 2] = ((buf[c] & 0x001f) << 3) | ((buf[c] & 0x001c) >> 2);
+      camPixels[base + 3] = 255;
+      base += 4;
+    }
+    camCtx.putImageData(camImageData, 0, lineNo + y);
+  }
+}
+function connectCamera(host) {
+  if (camSocket) { camSocket.close(); camSocket = null; }
+  if (!camCanvas) return;
+  if (!host) { setCameraStatus(false, 'Connect an ESP32 to see the live feed.'); return; }
+  setCameraStatus(false, 'Connecting to camera…');
+  const socket = new WebSocket(`ws://${host}:81/`);
+  socket.binaryType = 'arraybuffer';
+  socket.onopen = () => setCameraStatus(true, 'Camera connected');
+  socket.onclose = () => setCameraStatus(false, 'Camera disconnected');
+  socket.onerror = () => setCameraStatus(false, 'Cannot reach the camera stream.');
+  socket.onmessage = (event) => { if (event.data instanceof ArrayBuffer) drawCameraLine(event.data); };
+  camSocket = socket;
+}
+
 function timeNow() { return new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit' }).format(new Date()); }
 function updateUi() {
   ui.count.textContent = state.occupancy;
@@ -49,8 +93,10 @@ function connect(url) {
   state.endpoint = url.replace(/\/$/, '');
   localStorage.setItem('esp32Endpoint', state.endpoint);
   clearInterval(state.polling);
-  if (!state.endpoint) { setConnection(false, 'Demo mode'); ui.message.textContent = 'Leave blank to stay in demo mode.'; return; }
+  if (!state.endpoint) { setConnection(false, 'Demo mode'); ui.message.textContent = 'Leave blank to stay in demo mode.'; connectCamera(null); return; }
   ui.message.textContent = 'Connecting…'; pollEsp32(); state.polling = setInterval(pollEsp32, 1000);
+  const host = state.endpoint.replace(/^https?:\/\//, '').split(/[:/]/)[0];
+  connectCamera(host);
 }
 
 el('connectionForm').addEventListener('submit', (event) => { event.preventDefault(); connect(ui.url.value.trim()); });

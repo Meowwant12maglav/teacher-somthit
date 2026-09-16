@@ -18,8 +18,8 @@
 #include <OV7670.h>
 
 // Put your Wi-Fi name and password here before uploading.
-const char* WIFI_SSID = "Mc";
-const char* WIFI_PASSWORD = "87654321";
+const char* WIFI_SSID = "adui";
+const char* WIFI_PASSWORD = "75cfd9d2";
 
 // Reachable at http://esp32-room1.local/api/status once mDNS is up.
 // Camera stream page is served separately at http://esp32-room1.local:81/

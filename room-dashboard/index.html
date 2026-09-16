@@ -78,6 +78,17 @@
             <li class="empty-state">No entries yet. The first sensor event will appear here.</li>
           </ol>
         </article>
+
+        <article class="card camera-card">
+          <div class="card-heading">
+            <div><p class="eyebrow">LIVE CAMERA</p><h3>Doorway feed</h3></div>
+            <span class="live-pill live-pill-off" id="camStatusPill">OFFLINE</span>
+          </div>
+          <div class="camera-wrap">
+            <canvas id="camCanvas" width="176" height="144"></canvas>
+            <p class="subtle" id="camMessage">Connect an ESP32 to see the live feed.</p>
+          </div>
+        </article>
       </section>
 
       <section class="connect-card" id="connectPanel">
